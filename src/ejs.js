@@ -8,7 +8,7 @@
  *
  *  EJS is a client-side preprocessing engine written in and for JavaScript.
  *  If you have used PHP, ASP, JSP, or ERB then you get the idea: code embedded
- *  in [% // Code here %] tags will be executed, and code embedded in [%= .. %] 
+ *  in <% // Code here %> tags will be executed, and code embedded in <%= .. %> 
  *  tags will be evaluated and appended to the output. 
  * 
  *  This is essentially a direct JavaScript port of Masatoshi Seki's erb.rb 
@@ -20,7 +20,7 @@
  *  Usage:
  *      // source should be either a string or a DOM node whose innerHTML
  *      // contains EJB source.
- *  	var source = "[% var ejb="EJB"; %]<h1>Hello, [%= ejb %]!</h1>"; 
+ *  	var source = "<% var ejb="EJB"; %><h1>Hello, <%= ejb %>!</h1>"; 
  *      var compiler = new EjsCompiler(source);		
  *	    compiler.compile();	
  *	    var output = eval(compiler.out);
@@ -50,7 +50,7 @@ String.prototype.rsplit = function(regex) {
 		item = item.slice(result[0].length);
 		result = regex.exec(item);	
 	}
-	if (! item.empty())
+	if (! item == '')
 	{
 		retArr.push(item);
 	}
@@ -63,40 +63,62 @@ String.prototype.chop = function() {
 }
 
 /* Adaptation from the Scanner of erb.rb  */
-var EjsScanner = Class.create();
+var EjsScanner = function(source, left, right) {
+	this.left_delimiter = 	left +'%'	//<%
+	this.right_delimiter = 	'%'+right	//>
+	this.double_left = 		left+'%%'
+	this.double_right = 	'%%'+right
+	this.left_equal = 		left+'%='
+	this.left_comment = 	left+'%#'
+	if(left=='[')
+		this.SplitRegexp = /(\[%%)|(%%\])|(\[%=)|(\[%#)|(\[%)|(%\]\n)|(%\])|(\n)/;
+	else
+		this.SplitRegexp = new RegExp('('+this.double_left+')|(%%'+this.double_right+')|('+this.left_equal+')|('+this.left_comment+')|('+this.left_delimiter+')|('+this.right_delimiter+'\n)|('+this.right_delimiter+')|(\n)') 
+	
+	this.source = source;
+	this.stag = null;
+};
+
+EjsScanner.to_text = function(input){
+	if(input == null || input === undefined)
+        return '';
+    if(input instanceof Date)
+		return input.toDateString();
+	if(input.toString) 
+        return input.toString()
+	return '';
+}
+
 EjsScanner.prototype = {
-  initialize: function(source) {
-      this.SplitRegexp = /(\[%%)|(%%\])|(\[%=)|(\[%#)|(\[%)|(%\]\n)|(%\])|(\n)/;
-      this.source = source;
-	  this.stag = null;
-  },
 
   /* For each line, scan! */
   scan: function(block) {
      scanline = this.scanline;
 	 regex = this.SplitRegexp;
-	 if (! this.source.empty())
+	 if (! this.source == '')
 	 {
-		 this.source.split('\n').each(function(item) {
-			 scanline(item, regex, block);
-		 });
+	 	 var source_split = this.source.rsplit(/\n/);
+	 	 for(var i=0; i<source_split.length; i++) {
+		 	 var item = source_split[i];
+			 this.scanline(item, regex, block);
+		 }
 	 }
   },
   
   /* For each token, block! */
   scanline: function(line, regex, block) {
-     line.rsplit(regex).each(function(token) {
+	 var line_split = line.rsplit(regex);
+ 	 for(var i=0; i<line_split.length; i++) {
+	   var token = line_split[i];
        if (token != null) {
          block(token, this);
        }
-     });
+	 }
   }
 };
 
 /* Adaptation from the Buffer of erb.rb  */
-var EjsBuffer = Class.create();
-EjsBuffer.prototype = {
-  initialize: function(pre_cmd, post_cmd) {
+var EjsBuffer = function(pre_cmd, post_cmd) {
 	this.line = new Array();
 	this.script = "";
 	this.pre_cmd = pre_cmd;
@@ -106,8 +128,9 @@ EjsBuffer.prototype = {
 	{
 		this.push(pre_cmd[i]);
 	}
-  },
-	  
+}
+EjsBuffer.prototype = {
+	
   push: function(cmd) {
 	this.line.push(cmd);
   },
@@ -123,7 +146,7 @@ EjsBuffer.prototype = {
 	{
 		for (var i=0; i<this.post_cmd.length; i++)
 		{
-			this.push(post_cmd[i]);
+			this.push(pre_cmd[i]);
 		}
 		this.script = this.script + this.line.join('; ');
 		line = null;
@@ -133,9 +156,7 @@ EjsBuffer.prototype = {
 };
 
 /* Adaptation from the Compiler of erb.rb  */
-var EjsCompiler = Class.create();
-EjsCompiler.prototype = {
-  initialize: function(source) {
+EjsCompiler = function(source, left) {
 	this.pre_cmd = ['___ejsO = "";'];
 	this.post_cmd = new Array();
 	this.source = ' ';	
@@ -143,6 +164,8 @@ EjsCompiler.prototype = {
 	{
 		if (typeof source == 'string')
 		{
+		    source = source.replace(/\r\n/g, "\n");
+            source = source.replace(/\r/g,   "\n");
 			this.source = source;
 		}
 		else if (source.innerHTML)
@@ -154,38 +177,59 @@ EjsCompiler.prototype = {
 			this.source = "";
 		}
 	}
-	this.scanner = new EjsScanner(this.source);
+	left = left || '['
+	var right = ']'
+	switch(left) {
+		case '[':
+			break;
+		case '<':
+			right = '>'
+			break;
+		default:
+			throw left+' is not a supported deliminator'
+			break;
+	}
+	this.scanner = new EjsScanner(this.source, left, right);
 	this.out = '';
-  },
+}
+EjsCompiler.prototype = {
   compile: function() {
 	this.out = '';
 	var put_cmd = "___ejsO += ";
 	var insert_cmd = put_cmd;
 	var buff = new EjsBuffer(this.pre_cmd, this.post_cmd);		
 	var content = '';
+	var clean = function(content)
+	{
+	    content = content.replace(/\\/g, '\\\\');
+        content = content.replace(/\n/g, '\\n');
+        content = content.replace(/"/g,  '\\"');
+        return content;
+	} 
 	this.scanner.scan(function(token, scanner) {
 		if (scanner.stag == null)
 		{
 			switch(token) {
 				case '\n':
 					content = content + "\n";
-					buff.push(put_cmd + '"' + content + '"');
+					buff.push(put_cmd + '"' + clean(content) + '"');
 					buff.cr()
 					content = '';
 					break;
-				case '[%':
-				case '[%=':
-				case '[%#':
+				case scanner.left_delimiter:
+				case scanner.left_equal:
+				case scanner.left_comment:
 					scanner.stag = token;
 					if (content.length > 0)
 					{
 						// Chould be content.dump in Ruby
-						buff.push(put_cmd + '"' + content + '"');
+						
+						buff.push(put_cmd + '"' + clean(content) + '"');
 					}
 					content = '';
 					break;
-				case '[%%':
-					content = content + '[%';
+				case scanner.double_left:
+					content = content + scanner.left_delimiter;
 					break;
 				default:
 					content = content + token;
@@ -194,9 +238,9 @@ EjsCompiler.prototype = {
 		}
 		else {
 			switch(token) {
-				case '%]':
+				case scanner.right_delimiter:
 					switch(scanner.stag) {
-						case '[%':
+						case scanner.left_delimiter:
 							if (content[content.length - 1] == '\n')
 							{
 								content = content.chop();
@@ -207,15 +251,15 @@ EjsCompiler.prototype = {
 								buff.push(content);
 							}
 							break;
-						case '[%=':
-							buff.push(insert_cmd + "((" + content + ").toString())");
+						case scanner.left_equal:
+							buff.push(insert_cmd + "(EjsScanner.to_text(" + content + "))");
 							break;
 					}
 					scanner.stag = null;
 					content = '';
 					break;
-				case '%%]':
-					content = content + '%]';
+				case scanner.double_right:
+					content = content + scanner.right_delimiter;
 					break;
 				default:
 					content = content + token;
@@ -226,10 +270,11 @@ EjsCompiler.prototype = {
 	if (content.length > 0)
 	{
 		// Chould be content.dump in Ruby
-		buff.push(put_cmd + '"' + content + '"');
+		buff.push(put_cmd + '"' + clean(content) + '"');
 	}
 	buff.close();
 	this.out = buff.script + ";";
-  }	
+	var to_be_evaled = 'this.process = function(_CONTEXT) { with (_CONTEXT) {'+this.out+" return ___ejsO;}};";
+	eval(to_be_evaled);
+  }
 }
-	
