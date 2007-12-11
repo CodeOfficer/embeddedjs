@@ -77,6 +77,7 @@ var EjsScanner = function(source, left, right) {
 	
 	this.source = source;
 	this.stag = null;
+	this.lines = 0;
 };
 
 EjsScanner.to_text = function(input){
@@ -107,11 +108,16 @@ EjsScanner.prototype = {
   
   /* For each token, block! */
   scanline: function(line, regex, block) {
+	 this.lines++
 	 var line_split = line.rsplit(regex);
  	 for(var i=0; i<line_split.length; i++) {
 	   var token = line_split[i];
        if (token != null) {
-         block(token, this);
+		   	try{
+	         	block(token, this);
+		 	}catch(e){
+				throw {type: 'EjsScanner', line: this.lines}
+			}
        }
 	 }
   }
@@ -177,13 +183,13 @@ EjsCompiler = function(source, left) {
 			this.source = "";
 		}
 	}
-	left = left || '['
-	var right = ']'
+	left = left || '<'
+	var right = '>'
 	switch(left) {
 		case '[':
+			right = ']'
 			break;
 		case '<':
-			right = '>'
 			break;
 		default:
 			throw left+' is not a supported deliminator'
@@ -209,10 +215,11 @@ EjsCompiler.prototype = {
 	this.scanner.scan(function(token, scanner) {
 		if (scanner.stag == null)
 		{
+			//alert(token+'|'+(token == "\n"))
 			switch(token) {
 				case '\n':
 					content = content + "\n";
-					buff.push(put_cmd + '"' + clean(content) + '"');
+					buff.push(put_cmd + '"' + clean(content) + '";');
 					buff.cr()
 					content = '';
 					break;
@@ -275,6 +282,128 @@ EjsCompiler.prototype = {
 	buff.close();
 	this.out = buff.script + ";";
 	var to_be_evaled = 'this.process = function(_CONTEXT) { with (_CONTEXT) {'+this.out+" return ___ejsO;}};";
-	eval(to_be_evaled);
+	
+	try{
+		eval(to_be_evaled);
+	}catch(e){
+		if(typeof JSLINT != 'undefined'){
+			JSLINT(this.out)
+			for(var i = 0; i < JSLINT.errors.length; i++){
+				var error = JSLINT.errors[i];
+				if(error.reason != "Unnecessary semicolon."){
+					error.line++
+					throw error
+				}
+			}
+		}else{
+			throw e
+		}
+	}
   }
 }
+
+
+//type, cache, folder
+EJS = function( options ){
+	this.set_options(options)
+	
+	if(options.url){
+		var template = EJS.get(options.url, this.cache)
+		if (template) return template;
+	    if (template == EJS.INVALID_PATH) return null;
+		this.text = EJS.request(options.url)
+		if(this.text == null){
+			//EJS.update(options.url, this.INVALID_PATH);
+			throw 'There is no template at '+options.url
+		}
+		this.name = options.url
+	}else if(options.element)
+	{
+		if(typeof options.element == 'string'){
+			var name = options.element
+			options.element = document.getElementById(  options.element )
+			if(options.element == null) throw name+'does not exist!'
+		}
+		if(options.element.value){
+			this.text = options.element.value
+		}else{
+			this.text = options.element.innerHTML
+		}
+		this.name = options.element.id
+		this.type = '['
+	}
+	var template = new EjsCompiler(this.text, this.type);
+
+	template.compile();
+
+	
+	EJS.update(this.name, this);
+	this.template = template
+}
+EJS.config = function(options){
+	EJS.cache = options.cache != null ? options.cache : EJS.cache
+	EJS.type = options.type != null ? options.type : EJS.type
+	var templates_directory = {} //nice and private container
+	
+	EJS.get = function(path, cache){
+		if(cache == false) return null;
+		if(templates_directory[path]) return templates_directory[path];
+  		return null;
+	}
+	
+	EJS.update = function(path, template) { 
+		if(path == null) return;
+		templates_directory[path] = template 
+	}
+	
+	EJS.INVALID_PATH =  -1;
+	
+	
+}
+EJS.config( {cache: true, type: '<' } )
+
+EJS.prototype = {
+	render : function(object){
+		return this.template.process(object)
+	},
+	out : function(){
+		return this.template.out
+	},
+	set_options : function(options){
+		this.type = options.type != null ? options.type : EJS.type
+		this.cache = options.cache != null ? options.cache : EJS.cache
+		this.text = options.text != null ? options.text : null
+		this.name = options.name != null ? options.name : null
+	}
+}
+if(typeof Prototype != 'undefined') {
+	EJS.request = function(path){
+		var response = new Ajax.Request(path, {asynchronous: false, method: "get"});
+		if ( response.transport.status == 404 || response.transport.status == 2 ||
+			(response.transport.status == 0 && response.transport.responseText == '') ) return null;
+	    return response.transport.responseText
+	}
+}else
+{
+	EJS.request = function(path){
+	   var factories = [function() { return new XMLHttpRequest(); },function() { return new ActiveXObject("Msxml2.XMLHTTP"); },function() { return new ActiveXObject("Microsoft.XMLHTTP"); }];
+	   var request
+	   for(var i = 0; i < factories.length; i++) {
+	        try {
+	            request = factories[i]();
+	            if (request != null)  break;
+	        }
+	        catch(e) { continue;}
+	   }
+	   request.open("GET", path, false);
+	   
+	   try{request.send(null);}
+	   catch(e){return null;}
+	   
+	   if ( request.status == 404 || request.status == 2 ||(request.status == 0 && request.responseText == '') ) return null;
+	   
+	   return request.responseText
+	}
+}
+
+

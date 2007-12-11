@@ -74,7 +74,7 @@ JMVCTest = {
 			assertEqual( "<textarea id='task[description]' name='task[description]' cols='50' rows='4' >Here is some text.\nA new line.</textarea>",				
 				View.text_area_tag('task[description]', 'Here is some text.\nA new line.')  )
 		}},
-		test_text_area_tag : function(){with (this){
+		test_text_img_tag : function(){with (this){
 			assertEqual( "<img src='/some.png' alt='something' />",				
 				View.img_tag('/some.png', 'something')  )
 		}}

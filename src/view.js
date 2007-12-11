@@ -157,7 +157,7 @@ View.tag = function(tag, html_options, end) {
     if(!end) var end = '>'
     var txt = ' '
     for(var attr in html_options) { 
-       if(html_options[attr] != null)
+	   if(html_options[attr] != null)
         var value = html_options[attr].toString();
        else
         var value=''

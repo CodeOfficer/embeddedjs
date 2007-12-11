@@ -5,22 +5,14 @@ JMVCTest = {
 	  new Test.Unit.Runner({
 	  	
 		setup: function() {
+			this.animals = ['sloth', 'bear', 'monkey']
 		},
 		teardown: function() {
 		},
 	    test_find_and_process: function() { with(this) {
-			var templates = new Templates()
-			var object_to_process = {animals: ['sloth', 'bear', 'monkey']};
-			var result = templates.find('templates/test.ejs').process(object_to_process)
+			var result = new EJS({url: 'templates/test.ejs'}).render({animals: this.animals}) ;
 			assertEqual("<ul>\n<li>sloth</li>\n\n<li>bear</li>\n\n<li>monkey</li>\n</ul>", result)
 			
-	    }},
-		test_find_and_eval: function() { with(this) {
-			var templates = new Templates()
-			var animals = ['sloth', 'bear', 'monkey'];
-			var template =  templates.find('templates/test.ejs')
-			var compiled = eval(template.out);
-			assertEqual("<ul>\n<li>sloth</li>\n\n<li>bear</li>\n\n<li>monkey</li>\n</ul>", compiled)
 	    }},
 		test_caching: function() { with(this) {
 			// create a basic template to insert
@@ -28,19 +20,20 @@ JMVCTest = {
 					  "<ul><% animals.each(function(animal){%>" +
 			               "<li><%= animal %></li>" + 
 				      "<%});%></ul>";
-			var first_template = new EjsCompiler(ejs, '<')
-			first_template.compile()
+
+			EJS.update('templates/test.ejs', new EJS({text: ejs}) )
 			
-			var templates = new Templates()
-			templates.update('templates/test.ejs', first_template )
-			
-			var object_to_process = {animals: ['sloth', 'bear', 'monkey']};
-			var result = templates.find('templates/test.ejs').process(object_to_process)
+			var result = new EJS({url: 'templates/test.ejs'}).render({animals: this.animals}) ;
 			assertEqual("<% replace_me %><ul><li>sloth</li><li>bear</li><li>monkey</li></ul>", result)
 	    }},
 		test_template_not_found : function() { with(this) {
-			var templates = new Templates()
-			assertNull( templates.find('templates/test_not_there.ejs') )
+			try{
+				new EJS({url: 'templates/test_not_found.ejs'}) ;
+				assert(false, 'an error should have happened')
+			}catch(e){
+				assert(true)
+			}
+
 	    }}
 		
 		//error

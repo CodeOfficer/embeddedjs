@@ -18,7 +18,12 @@
 <!-- Log output -->
 <div id="testlog"> </div>
 
+<br/>
+<textarea id='test_template'><ul>[% animals.each(function(animal){%]
+	<li>[%= animal %]</li>
+[%});%]</ul></textarea>
 
+<br/>
 
 </body>
 	<script language="javascript" type="text/javascript">
@@ -28,7 +33,9 @@
 		DATABASE_NAME = JMVCTest.APPLICATION_NAME;
 
 	</script>
-	<script src="../src/ejs_production.js" type="text/javascript"></script>
+	<script src="../src/ejs.js" type="text/javascript"></script>
+	<script src="../src/view.js" type="text/javascript"></script>
+	<script src="../lib/fulljslint.js" type="text/javascript"></script>
 	<script language="javascript" type="text/javascript">
 		JMVCTest.perform_test();
 	</script>
