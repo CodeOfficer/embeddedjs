@@ -78,9 +78,17 @@ JMVCTest = {
 			assertEqual( "<textarea id='task[description]' name='task[description]' cols='50' rows='4' >Here is some text.\nA new line.</textarea>",				
 				EjsView.text_area_tag('task[description]', 'Here is some text.\nA new line.')  )
 		}},
+		test_text_field_tag : function(){with (this){
+			assertEqual( "<input id='something[interesting]' value='5' type='text' name='something[interesting]' />",				
+				EjsView.text_field_tag('something[interesting]', 5)  )
+		}},
 		test_text_img_tag : function(){with (this){
 			assertEqual( "<img src='/some.png' alt='something' />",				
 				EjsView.img_tag('/some.png', 'something')  )
+		}},
+		test_submit_tag : function(){with (this){
+			assertEqual( "<input type=\'submit\' value=\'Submit\' />",				
+				EjsView.submit_tag('Submit')  )
 		}}
 		
 		
