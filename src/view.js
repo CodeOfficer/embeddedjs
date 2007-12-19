@@ -1,3 +1,5 @@
+EjsView = function(){}
+
 EjsView.date_tag = function(name, value , html_options) {
     if(! (value instanceof Date))
 		value = new Date()
@@ -144,7 +146,7 @@ EjsView.start_tag_for = function(tag, html_options)  { return this.tag(tag, html
 
 EjsView.submit_tag = function(name, html_options) {  
     html_options = html_options || {};
-    html_options.name  = html_options.id  || 'commit';
+    //html_options.name  = html_options.id  || 'commit';
     html_options.type = html_options.type  || 'submit';
     html_options.value = name || 'Submit';
     return this.single_tag_for('input', html_options);
