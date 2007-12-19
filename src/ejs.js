@@ -34,7 +34,7 @@
 /* Make a split function like Ruby's: "abc".split(/b/) -> ['a', 'b', 'c'] */
 String.prototype.rsplit = function(regex) {
 	var item = this;
-	result = regex.exec(item);
+	var result = regex.exec(item);
 	var retArr = new Array();
 	while (result != null)
 	{
@@ -79,7 +79,7 @@ var EjsScanner = function(source, left, right) {
 	this.stag = null;
 	this.lines = 0;
 };
-
+EjsView = {}
 EjsScanner.to_text = function(input){
 	if(input == null || input === undefined)
         return '';
@@ -199,7 +199,8 @@ EjsCompiler = function(source, left) {
 	this.out = '';
 }
 EjsCompiler.prototype = {
-  compile: function() {
+  compile: function(options) {
+  	options = options || {};
 	this.out = '';
 	var put_cmd = "___ejsO += ";
 	var insert_cmd = put_cmd;
@@ -281,7 +282,7 @@ EjsCompiler.prototype = {
 	}
 	buff.close();
 	this.out = buff.script + ";";
-	var to_be_evaled = 'this.process = function(_CONTEXT) { with (_CONTEXT) {'+this.out+" return ___ejsO;}};";
+	var to_be_evaled = 'this.process = function(_CONTEXT) { try { with(EjsView) { with (_CONTEXT) {'+this.out+" return ___ejsO;}}}catch(e){e.lineNumber=null;throw e;}};";
 	
 	try{
 		eval(to_be_evaled);
@@ -291,12 +292,17 @@ EjsCompiler.prototype = {
 			for(var i = 0; i < JSLINT.errors.length; i++){
 				var error = JSLINT.errors[i];
 				if(error.reason != "Unnecessary semicolon."){
-					error.line++
-					throw error
+					error.line++;
+					var e = new Error();
+					e.lineNumber = error.line;
+					e.message = error.reason;
+					if(options.url)
+						e.fileName = options.url;
+					throw e;
 				}
 			}
 		}else{
-			throw e
+			throw e;
 		}
 	}
   }
@@ -334,7 +340,7 @@ EJS = function( options ){
 	}
 	var template = new EjsCompiler(this.text, this.type);
 
-	template.compile();
+	template.compile(options);
 
 	
 	EJS.update(this.name, this);

@@ -82,7 +82,7 @@ JMVCTest = {
 				var compiled = new EJS({text: text}) ;
 				assert(false,'An error should have been reported')
 			}catch(e){
-				assertEqual(2, e.line)
+				assertEqual(2, e.lineNumber)
 			}
 	    }}
 	    

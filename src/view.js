@@ -1,7 +1,4 @@
-View = function() {
-    this.klass = 'View'
-}
-View.date_tag = function(name, value , html_options) {
+EjsView.date_tag = function(name, value , html_options) {
     if(! (value instanceof Date))
 		value = new Date()
 	
@@ -29,7 +26,7 @@ View.date_tag = function(name, value , html_options) {
     return year_select+month_select+day_select;
 }
 
-View.form_tag = function(action, html_options) {
+EjsView.form_tag = function(action, html_options) {
                  
     
     html_options     = html_options                     || {};
@@ -42,13 +39,13 @@ View.form_tag = function(action, html_options) {
     return this.start_tag_for('form', html_options)
 }
 
-View.form_tag_end = function() { return this.tag_end('form'); }
+EjsView.form_tag_end = function() { return this.tag_end('form'); }
 
-View.hidden_field_tag   = function(name, value, html_options) { 
+EjsView.hidden_field_tag   = function(name, value, html_options) { 
     return this.input_field_tag(name, value, 'hidden', html_options); 
 }
 
-View.input_field_tag = function(name, value , inputType, html_options) {
+EjsView.input_field_tag = function(name, value , inputType, html_options) {
     
     html_options = html_options || {};
     html_options.id  = html_options.id  || name;
@@ -59,12 +56,12 @@ View.input_field_tag = function(name, value , inputType, html_options) {
     return this.single_tag_for('input', html_options)
 }
 
-View.is_current_page = function(url) {
+EjsView.is_current_page = function(url) {
 	if(window.location.href == url || window.location.pathname == url) return true;
 	return false;
 }
 
-View.link_to = function(name, url, html_options) {
+EjsView.link_to = function(name, url, html_options) {
     if(!name) var name = 'null';
     if(!html_options) var html_options = {}
 	
@@ -77,7 +74,7 @@ View.link_to = function(name, url, html_options) {
     return this.start_tag_for('a', html_options)+name+ this.tag_end('a');
 }
 
-View.submit_link_to = function(name, url, html_options){
+EjsView.submit_link_to = function(name, url, html_options){
 	if(!name) var name = 'null';
     if(!html_options) var html_options = {}
     html_options.onclick = html_options.onclick  || '' ;
@@ -96,11 +93,11 @@ View.submit_link_to = function(name, url, html_options){
 	return this.start_tag_for('input', html_options)
 }
 
-View.link_to_if = function(condition, name, url, html_options, post, block) {
+EjsView.link_to_if = function(condition, name, url, html_options, post, block) {
 	return this.link_to_unless((condition == false), name, url, html_options, post, block);
 }
 
-View.link_to_unless = function(condition, name, url, html_options, block) {
+EjsView.link_to_unless = function(condition, name, url, html_options, block) {
 	html_options = html_options || {};
 	if(condition) {
 		if(block && typeof block == 'function') {
@@ -112,15 +109,15 @@ View.link_to_unless = function(condition, name, url, html_options, block) {
 		return this.link_to(name, url, html_options);
 }
 
-View.link_to_unless_current = function(name, url, html_options, block) {
+EjsView.link_to_unless_current = function(name, url, html_options, block) {
 	html_options = html_options || {};
 	return this.link_to_unless(this.is_current_page(url), name, url, html_options, block)
 }
 
 
-View.password_field_tag = function(name, value, html_options) { return this.input_field_tag(name, value, 'password', html_options); }
+EjsView.password_field_tag = function(name, value, html_options) { return this.input_field_tag(name, value, 'password', html_options); }
 
-View.select_tag = function(name, value, choices, html_options) {     
+EjsView.select_tag = function(name, value, choices, html_options) {     
     html_options = html_options || {};
     html_options.id  = html_options.id  || name;
     html_options.value = value;
@@ -141,11 +138,11 @@ View.select_tag = function(name, value, choices, html_options) {
     return txt;
 }
 
-View.single_tag_for = function(tag, html_options) { return this.tag(tag, html_options, '/>');}
+EjsView.single_tag_for = function(tag, html_options) { return this.tag(tag, html_options, '/>');}
 
-View.start_tag_for = function(tag, html_options)  { return this.tag(tag, html_options); }
+EjsView.start_tag_for = function(tag, html_options)  { return this.tag(tag, html_options); }
 
-View.submit_tag = function(name, html_options) {  
+EjsView.submit_tag = function(name, html_options) {  
     html_options = html_options || {};
     html_options.name  = html_options.id  || 'commit';
     html_options.type = html_options.type  || 'submit';
@@ -153,7 +150,7 @@ View.submit_tag = function(name, html_options) {
     return this.single_tag_for('input', html_options);
 }
 
-View.tag = function(tag, html_options, end) {
+EjsView.tag = function(tag, html_options, end) {
     if(!end) var end = '>'
     var txt = ' '
     for(var attr in html_options) { 
@@ -171,9 +168,9 @@ View.tag = function(tag, html_options, end) {
     return '<'+tag+txt+end;
 }
 
-View.tag_end = function(tag)             { return '</'+tag+'>'; }
+EjsView.tag_end = function(tag)             { return '</'+tag+'>'; }
 
-View.text_area_tag = function(name, value, html_options) { 
+EjsView.text_area_tag = function(name, value, html_options) { 
     html_options = html_options || {};
     html_options.id  = html_options.id  || name;
     html_options.name  = html_options.name  || name;
@@ -189,16 +186,16 @@ View.text_area_tag = function(name, value, html_options) {
     
     return  this.start_tag_for('textarea', html_options)+value+this.tag_end('textarea')
 }
-View.text_tag = View.text_area_tag
+EjsView.text_tag = EjsView.text_area_tag
 
-View.text_field_tag     = function(name, value, html_options) { return this.input_field_tag(name, value, 'text', html_options); }
+EjsView.text_field_tag     = function(name, value, html_options) { return this.input_field_tag(name, value, 'text', html_options); }
 
-View.url_for = function(url) {
+EjsView.url_for = function(url) {
         return 'window.location="'+url+'";'
 }
-View.img_tag = function(image_location, alt, options){
+EjsView.img_tag = function(image_location, alt, options){
 	options = options || {};
 	options.src = image_location
 	options.alt = alt
-	return View.single_tag_for('img', options)
+	return EjsView.single_tag_for('img', options)
 }
