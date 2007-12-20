@@ -32,6 +32,11 @@ JMVCTest = {
 
 			assertEqual("<ul><li>sloth</li><li>bear</li><li>monkey</li></ul>", compiled)
 	    }},
+		test_update : function() { with(this) {
+			var compiled = new EJS({text: this.angle_brackets_no_this}).update( 'update_me', {animals: this.animals}  );
+
+			assertEqual("<ul><li>sloth</li><li>bear</li><li>monkey</li></ul>", document.getElementById('update_me').innerHTML )
+	    }},
 		test_render_with_double: function() { with(this) {
 			var text = "<%% replace_me %>"+
 					  "<ul><% animals.each(function(animal){%>" +

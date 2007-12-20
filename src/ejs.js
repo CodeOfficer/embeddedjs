@@ -370,7 +370,7 @@ EJS.config( {cache: true, type: '<' } )
 
 EJS.prototype = {
 	render : function(object){
-		return this.template.process(object)
+		return this.template.process.call(object, object)
 	},
 	out : function(){
 		return this.template.out
@@ -380,9 +380,28 @@ EJS.prototype = {
 		this.cache = options.cache != null ? options.cache : EJS.cache
 		this.text = options.text != null ? options.text : null
 		this.name = options.name != null ? options.name : null
+	},
+	update : function(element, options){
+		if(typeof element == 'string'){
+			element = document.getElementById(element)
+		}
+		
+		if(typeof options == 'string'){
+			params = {}
+			params.url = options
+			_template = this;
+			params.onComplete = function(request){
+				var object = eval( request.responseText )
+				EJS.prototype.update.call(_template, element, object)
+			}
+			EJS.ajax_request(params)
+		}else
+		{
+			element.innerHTML = this.render(options)
+		}
 	}
 }
-if(typeof Prototype != 'undefined') {
+/*if(typeof Prototype != 'undefined') {
 	EJS.request = function(path){
 		var response = new Ajax.Request(path, {asynchronous: false, method: "get"});
 		if ( response.transport.status == 404 || response.transport.status == 2 ||
@@ -390,17 +409,20 @@ if(typeof Prototype != 'undefined') {
 	    return response.transport.responseText
 	}
 }else
-{
-	EJS.request = function(path){
+{*/
+	EJS.newRequest = function(){
 	   var factories = [function() { return new XMLHttpRequest(); },function() { return new ActiveXObject("Msxml2.XMLHTTP"); },function() { return new ActiveXObject("Microsoft.XMLHTTP"); }];
-	   var request
 	   for(var i = 0; i < factories.length; i++) {
 	        try {
-	            request = factories[i]();
-	            if (request != null)  break;
+	            var request = factories[i]();
+	            if (request != null)  return request;
 	        }
 	        catch(e) { continue;}
 	   }
+	}
+	
+	EJS.request = function(path){
+	   var request = new EJS.newRequest()
 	   request.open("GET", path, false);
 	   
 	   try{request.send(null);}
@@ -410,6 +432,23 @@ if(typeof Prototype != 'undefined') {
 	   
 	   return request.responseText
 	}
-}
+	EJS.ajax_request = function(params){
+		params.method = ( params.method ? params.method : 'GET')
+		
+		var request = new EJS.newRequest();
+		request.onreadystatechange = function(){
+			if(request.readyState == 4){
+				if(request.status == 200){
+					params.onComplete(request)
+				}else
+				{
+					params.onComplete(request)
+				}
+			}
+		}
+		request.open(params.method, params.url)
+		request.send(null)
+	}
+//}
 
 
