@@ -385,7 +385,12 @@ EJS.prototype = {
 		if(typeof element == 'string'){
 			element = document.getElementById(element)
 		}
-		
+		if(options == null){
+			_template = this;
+			return function(object){
+				EJS.prototype.update.call(_template, element, object)
+			}
+		}
 		if(typeof options == 'string'){
 			params = {}
 			params.url = options
