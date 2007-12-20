@@ -381,6 +381,9 @@ EJS.prototype = {
 		this.text = options.text != null ? options.text : null
 		this.name = options.name != null ? options.name : null
 	},
+	// called without options, returns a function that takes the object
+	// called with options being a string, uses that as a url
+	// called with options as an object
 	update : function(element, options){
 		if(typeof element == 'string'){
 			element = document.getElementById(element)
