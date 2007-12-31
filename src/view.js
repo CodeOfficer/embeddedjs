@@ -59,8 +59,7 @@ EjsView.input_field_tag = function(name, value , inputType, html_options) {
 }
 
 EjsView.is_current_page = function(url) {
-	if(window.location.href == url || window.location.pathname == url) return true;
-	return false;
+	return (window.location.href == url || window.location.pathname == url ? true : false);
 }
 
 EjsView.link_to = function(name, url, html_options) {

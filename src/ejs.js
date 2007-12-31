@@ -409,15 +409,7 @@ EJS.prototype = {
 		}
 	}
 }
-/*if(typeof Prototype != 'undefined') {
-	EJS.request = function(path){
-		var response = new Ajax.Request(path, {asynchronous: false, method: "get"});
-		if ( response.transport.status == 404 || response.transport.status == 2 ||
-			(response.transport.status == 0 && response.transport.responseText == '') ) return null;
-	    return response.transport.responseText
-	}
-}else
-{*/
+
 	EJS.newRequest = function(){
 	   var factories = [function() { return new XMLHttpRequest(); },function() { return new ActiveXObject("Msxml2.XMLHTTP"); },function() { return new ActiveXObject("Microsoft.XMLHTTP"); }];
 	   for(var i = 0; i < factories.length; i++) {
