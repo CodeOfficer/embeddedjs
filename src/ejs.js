@@ -79,7 +79,14 @@ var EjsScanner = function(source, left, right) {
 	this.stag = null;
 	this.lines = 0;
 };
-EjsView = {}
+EjsView = function(data){
+	this.data = data
+}
+EjsView.prototype.partial = function(options, data){
+	if(!data) data = this.data;
+	return new EJS(options).render(data);
+}
+
 EjsScanner.to_text = function(input){
 	if(input == null || input === undefined)
         return '';
@@ -282,7 +289,7 @@ EjsCompiler.prototype = {
 	}
 	buff.close();
 	this.out = buff.script + ";";
-	var to_be_evaled = 'this.process = function(_CONTEXT) { try { with(EjsView) { with (_CONTEXT) {'+this.out+" return ___ejsO;}}}catch(e){e.lineNumber=null;throw e;}};";
+	var to_be_evaled = 'this.process = function(_CONTEXT,_VIEW) { try { with(_VIEW) { with (_CONTEXT) {'+this.out+" return ___ejsO;}}}catch(e){e.lineNumber=null;throw e;}};";
 	
 	try{
 		eval(to_be_evaled);
@@ -370,7 +377,8 @@ EJS.config( {cache: true, type: '<' } )
 
 EJS.prototype = {
 	render : function(object){
-		return this.template.process.call(object, object)
+		var v = new EjsView(object);
+		return this.template.process.call(v, object,v);
 	},
 	out : function(){
 		return this.template.out
