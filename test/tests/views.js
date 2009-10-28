@@ -5,7 +5,7 @@ JMVCTest = {
 	  new Test.Unit.Runner({
 	  	
 		setup: function() {
-			this.view = new EjsView({});
+			this.view = new EJS.Helpers({});
 			this.animals = ['sloth', 'bear', 'monkey'];
 		},
 		teardown: function() {

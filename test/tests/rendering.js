@@ -19,8 +19,7 @@ JMVCTest = {
 		teardown: function() {
 		},
 	    test_render_with_left_bracket: function() { with(this) {
-			var template = new EJS({text: this.square_brackets, type: '['});		
-			var compiled = eval(template.out());
+			var compiled = new EJS({text: this.square_brackets, type: '['}).render({animals: this.animals})
 			assertEqual("<ul><li>sloth</li><li>bear</li><li>monkey</li></ul>", compiled)
 	    }},
 		test_render_with_process: function() { with(this) {
