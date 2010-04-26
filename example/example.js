@@ -12,8 +12,8 @@ function testUsingText() {
 	 */
 	var animals = ['sloth', 'bear', 'monkey'];
 	var ejs = "<ul>[% animals.each(function(animal){%]" +
-	               "<li>[%= animal %]</li>" + 
-		      "[%});%]</ul>";
+						"<li>[%= animal %]</li>" + 
+						"[%});%]</ul>";
 	
 	/*
 	 * Create a new compiler and pass it a reference to the DOM
@@ -24,7 +24,7 @@ function testUsingText() {
 	/*
 	 * Call the compile() function
 	 */
-	compiler.compile();	
+	compiler.compile(); 
 	
 	/*
 	 * View the compiled results
@@ -52,12 +52,12 @@ function testUsingDOM() {
 	 * Some DOM Element on your web page is to be the recipient 
 	 * of the processed EJS fragment. This element is assigned 
 	 * to *output*.
-     *
+		 *
 	 */
 	var source = $('source_code');
 	var output = $('output_results');
 
-    /*
+		/*
 	 * Create a new compiler and pass it a reference to the DOM
 	 * node containing the source
 	 */
@@ -66,7 +66,7 @@ function testUsingDOM() {
 	/*
 	 * Call the compile() function
 	 */
-	compiler.compile();	
+	compiler.compile(); 
 	
 	/*
 	 * View the compiled results
@@ -83,6 +83,4 @@ function testUsingDOM() {
 	 * Set the inner HTML of the output node to the result.
 	 */
 	output.innerHTML = compiled;
-
-
-}
+};
