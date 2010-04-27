@@ -1,0 +1,1 @@
+java -jar script/yuicompressor-2.2.4.jar --charset=utf-8 -o dist/embedded.min.js src/*
