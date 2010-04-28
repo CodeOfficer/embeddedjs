@@ -7,8 +7,7 @@ file "embedded.min.js" => "dist" do
   sh "java -jar script/yuicompressor-2.2.4.jar --charset=utf-8 src/view.js >> dist/embedded.min.js"
 end
 
-desc "Build the file"
+desc "Build the files"
 task :default => "embedded.min.js" do
-  puts "Hello World!"
-
+  puts "Build Complete: look in the 'dist' folder."
 end
