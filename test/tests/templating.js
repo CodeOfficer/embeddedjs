@@ -34,10 +34,13 @@ JMVCTest = {
 		
 		test_template_not_found : function() { with(this) {
 			try {
-				new EJS({url: 'templates/test_not_found.ejs'});
+				 x = new EJS({url: 'templates/test_not_found.ejs'});
+				console.log(x);
 				assert(false, 'an error should have happened');
+				console.log('object');
 			} catch(e) {
 				assert(true);
+				console.log('object2');
 			};
 		}}
 		

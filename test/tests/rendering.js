@@ -77,11 +77,11 @@ JMVCTest = {
 
 			test_with_elements : function(){with(this){
 				var compiled = new EJS({element: 'test_template'}).render({animals: this.animals});
-				assertEqual("<ul>\n\t<li>sloth</li>\n\n\t<li>bear</li>\n\n\t<li>monkey</li>\n</ul>", 
+				assertEqual("<ul><li>sloth</li><li>bear</li><li>monkey</li></ul>", 
 					compiled
 				);
 				var compiled = new EJS({element: document.getElementById('test_template') }).render({animals: this.animals});
-				assertEqual("<ul>\n\t<li>sloth</li>\n\n\t<li>bear</li>\n\n\t<li>monkey</li>\n</ul>", 
+				assertEqual("<ul><li>sloth</li><li>bear</li><li>monkey</li></ul>", 
 					compiled
 				);
 			}},
