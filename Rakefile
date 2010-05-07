@@ -1,4 +1,3 @@
-
 directory "dist"
 
 file "embedded.min.js" => "dist" do
